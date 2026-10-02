@@ -27,7 +27,7 @@
 ### Option 1: Auto Install (Single Command) - Recommended
 Copy and paste this single command into your Termux app and press Enter:
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/EM57/Termux_Elite_Banner/refs/heads/main/setup.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/EH-69/Termux_Elite_Banner/refs/heads/main/setup.sh)
 ```
 `(During setup, simply type the name you want to display on the 3D banner!)`
 
