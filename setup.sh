@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # ==============================================================================
-#  PROJECT   : EH ELITE TERMINAL HUD (AUTO-REPAIR EDITION)
-#  DEVELOPER : EH-69 (https://github.com/EH-69)
+#  PROJECT   : EH ELITE TERMINAL HUD
+#  DEVELOPER : EH-69
 #  REPO      : Termux_Elite_Banner
 # ==============================================================================
 
@@ -16,52 +16,36 @@ cat << "EOF"
  | |____| |  | |     | (_) |  / / 
  |______|_|  |_|      \___/  /_/  
 EOF
-echo -e "\033[1;32m[*] EH Elite Terminal Setup Engine by \033[1;36mEH-69\033[0m"
+echo -e "\033[1;32m[*] EH Elite Terminal Setup Engine\033[0m"
 echo -e "\033[38;5;240m────────────────────────────────────────────────────────────\033[0m"
 
-# ------------------------------------------------------------------------------
-# ১. সেলফ-হিলিং ইঞ্জিন (যে কোনো ড্যামেজড প্যাকেজ বা এরর অটো ফিক্স)
-# ------------------------------------------------------------------------------
-echo -e "\033[1;33m[*] Checking & repairing broken packages automatically...\033[0m"
+# সাইলেন্ট ডিপেন্ডেন্সি ও প্যাকেজ মেরামত
 dpkg --configure -a >/dev/null 2>&1
 pkg update -y >/dev/null 2>&1
-pkg install -y ncurses-utils procps tar xz-utils >/dev/null 2>&1
+pkg install -y ncurses-utils procps tar xz-utils figlet curl wget >/dev/null 2>&1
 
-# লাইব্রেরি ক্র্যাশ ফিক্স
 if ! curl -V >/dev/null 2>&1; then
     pkg reinstall -y curl libcurl libngtcp2 openssl >/dev/null 2>&1
 fi
-if ! wget --version >/dev/null 2>&1; then
-    pkg install -y wget >/dev/null 2>&1
-fi
-if ! figlet -v >/dev/null 2>&1; then
-    pkg install -y figlet >/dev/null 2>&1
-fi
 
-# ------------------------------------------------------------------------------
-# ২. ইউজার ইনপুট (ব্যানার নেম)
-# ------------------------------------------------------------------------------
-echo -e "\n\033[1;33m[?] Customization Option:\033[0m"
+# ইউজার থেকে ব্যানারের নাম ইনপুট
+echo -e "\033[1;33m[?] Customization Option:\033[0m"
 read -p "Enter Banner Name [Press Enter for default: EH-69]: " USER_BANNER
 USER_BANNER=${USER_BANNER:-"EH-69"}
-
-echo -e "\n\033[1;36m[*] Selected Name: \033[1;32m$USER_BANNER\033[0m"
-echo -e "\033[1;36m[*] Downloading 3D Fonts & Setting Up...\033[0m"
 
 # ব্যাকআপ
 [ -f ~/.bashrc ] && cp ~/.bashrc ~/.bashrc.bak_eh69 2>/dev/null
 
-# ৩ডি ফন্ট ডাউনলোড (ডাবল ফলব্যাক সহ)
+# ৩ডি ফন্ট ডাউনলোড
 mkdir -p ~/.figlet_fonts
 FONT_URL="https://raw.githubusercontent.com/xero/figlet-fonts/master/ANSI%20Shadow.flf"
 curl -fsSL "$FONT_URL" -o ~/.figlet_fonts/ANSI_Shadow.flf 2>/dev/null || \
 wget -qO ~/.figlet_fonts/ANSI_Shadow.flf "$FONT_URL" 2>/dev/null
 
-# ble.sh ইনস্টলেশন (ডাবল ফলব্যাক সহ)
+# ble.sh ইনস্টলেশন
 mkdir -p ~/.local/share
 rm -rf /tmp/ble.tar.xz ~/.local/share/ble-nightly 2>/dev/null
 BLE_URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
-
 (curl -k -fsSL "$BLE_URL" -o /tmp/ble.tar.xz 2>/dev/null || wget --no-check-certificate -qO /tmp/ble.tar.xz "$BLE_URL" 2>/dev/null)
 
 if [ -f /tmp/ble.tar.xz ] && [ -s /tmp/ble.tar.xz ]; then
@@ -71,7 +55,6 @@ if [ -f /tmp/ble.tar.xz ] && [ -s /tmp/ble.tar.xz ]; then
     rm -f /tmp/ble.tar.xz 2>/dev/null
 fi
 
-# ble.sh কনফিগারেশন তৈরি
 cat << 'EOF' > ~/.blerc
 bleopt highlight_syntax=1
 bleopt complete_auto_menu=1
@@ -85,33 +68,36 @@ ble-face -s command_file fg=84
 ble-face -s command_error fg=196,underline
 EOF
 
-# পার্ট ১: ডাইনামিক নাম ও কনফিগ রাইট করা
+# পার্ট ১: ইউজারের নাম সংরক্ষণ
 cat << EOF > ~/.bashrc
-# ==============================================================================
-#  EH ELITE TERMINAL CONFIGURATION
-#  CREATOR: EH-69 (https://github.com/EH-69)
-# ==============================================================================
 export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
-
 MY_NAME="$USER_BANNER"
 DEV_NAME="EH-69"
 EOF
 
-# পার্ট ২: টার্মিনাল ডিজাইন ও HUD
+# পার্ট ২: টার্মিনাল HUD ও র‍্যান্ডম কালার ইঞ্জিন
 cat << 'EOF' >> ~/.bashrc
 [[ $- == *i* ]] && [ -f "$HOME/.local/share/blesh/ble.sh" ] && source "$HOME/.local/share/blesh/ble.sh" --attach=none
 
 print_banner() {
-    local THEME=$((RANDOM % 4))
+    # প্রতিবার clear দিলে আলাদা আলাদা নিয়ন কালার থিম জেনারেট হবে
+    local THEME=$((RANDOM % 5))
     if [ $THEME -eq 0 ]; then
+        # Cyber Sunset
         TOP_C='\033[38;5;208m'; BOT_C='\033[38;5;198m'; BORD_C='\033[38;5;129m'; ACC_C='\033[38;5;51m'
     elif [ $THEME -eq 1 ]; then
+        # Matrix Neon Green
         TOP_C='\033[38;5;154m'; BOT_C='\033[38;5;46m';  BORD_C='\033[38;5;34m';  ACC_C='\033[38;5;226m'
     elif [ $THEME -eq 2 ]; then
+        # Tokyo Neon Cyan
         TOP_C='\033[38;5;51m';  BOT_C='\033[38;5;39m';  BORD_C='\033[38;5;27m';  ACC_C='\033[38;5;213m'
-    else
+    elif [ $THEME -eq 3 ]; then
+        # Electric Violet & Pink
         TOP_C='\033[38;5;213m'; BOT_C='\033[38;5;141m'; BORD_C='\033[38;5;63m';  ACC_C='\033[38;5;46m'
+    else
+        # Golden Fire
+        TOP_C='\033[38;5;220m'; BOT_C='\033[38;5;202m'; BORD_C='\033[38;5;166m'; ACC_C='\033[38;5;45m'
     fi
 
     export DYN_THEME_C="$TOP_C"
@@ -125,12 +111,12 @@ print_banner() {
 
     echo ""
 
-    # ১. ১ম লাইনে ডাবল দাগ
+    # ১ম লাইনে ডাবল দাগ
     printf "${BORD_C}"
     for ((j=0; j<TERM_COLS; j++)); do printf "═"; done
     printf "${NC}\n"
 
-    # ২. ২য় লাইনে সাইবার ডেকোরেশন
+    # ২য় লাইনে সাইবার ডেকোরেশন
     local TOP_MID=" » ---- «•○ ❈ ○•» ---- « "
     local SIDE_LEN=$(( (TERM_COLS - ${#TOP_MID}) / 2 ))
     [ $SIDE_LEN -lt 2 ] && SIDE_LEN=2
@@ -149,7 +135,6 @@ print_banner() {
 
     mapfile -t ASCII_ART <<< "$ASCII_OUT"
 
-    # অতিরিক্ত ফাঁকা স্পেস ট্রিম
     while [ ${#ASCII_ART[@]} -gt 0 ] && [[ -z "${ASCII_ART[-1]// }" ]]; do
         unset 'ASCII_ART[-1]'
     done
@@ -168,13 +153,13 @@ print_banner() {
         fi
     done
 
-    # ৩. ব্যানারের ঠিক নিচে EH ELITE TERMINAL
+    # EH ELITE TERMINAL
     local SUB_TEXT="ﮩ٨ـﮩﮩ٨ـ𝙴𝙷 𝙴𝙻𝙸𝚃𝙴 𝚃𝙴𝚁𝙼𝙸𝙽𝙰𝙻ﮩ٨ـﮩﮩ٨ـ"
     local PAD_SUB=$(( (TERM_COLS - ${#SUB_TEXT}) / 2 ))
     [ $PAD_SUB -lt 0 ] && PAD_SUB=0
     printf "%${PAD_SUB}s${NEON_RED}%s${NC}\n\n" "" "$SUB_TEXT"
 
-    # ৪. পারফেক্ট অ্যালাইনমেন্ট বক্স
+    # বক্স অ্যালাইনমেন্ট
     local INNER_WIDTH=$((TERM_COLS - 2))
 
     draw_line() {
@@ -222,13 +207,14 @@ print_banner() {
     draw_row "🧠" "MEMORY"  "$MEM_VAL"
     draw_line "╚" "═" "╝"
 
-    # ৫. মোটিভেশন টেক্সট (বক্সের একদম গায়ে লাগানো)
+    # মোটিভেশন টেক্সট
     local TAG_STR="- In zeros and ones - you are the one. -"
     local PAD_TAG=$(( (TERM_COLS - ${#TAG_STR}) / 2 ))
     [ $PAD_TAG -lt 0 ] && PAD_TAG=0
     printf "%${PAD_TAG}s${DYN_THEME_C}%s${NC}\n\n" "" "$TAG_STR"
 }
 
+# clear বা cls দিলে স্ক্রিন পরিষ্কার হয়ে প্রতিবার নতুন কালারের ব্যানার আসবে
 alias clear='command clear; print_banner'
 alias cls='clear'
 
@@ -265,22 +251,7 @@ PROMPT_COMMAND=build_prompt
 [[ ${BLE_VERSION-} ]] && ble-attach
 EOF
 
+# কোনো এরর ছাড়াই সফল ফিনিশিং
 source ~/.bashrc 2>/dev/null
-echo -e "\n\033[1;32m[✔] Installation & All Auto-Repairs Successful!\033[0m"
-echo -e "\033[1;36mAuthor Credit: EH-69 (https://github.com/EH-69)\033[0m\n"33[38;5;129m\]❯\[\033[38;5;51m\]❯"
-    fi
-
-    PS1="${C_SIDE}┌──${C_BRK}[${C_USER}${MY_NAME}${C_AT}@${C_HST}Terminal${C_BRK}]${C_SIDE}-${C_BRK}[${C_DIR}\w${C_BRK}]\n"
-    PS1+="${C_SIDE}│\n"
-    PS1+="${C_SIDE}└───${ARROWS}${RST} "
-}
-
-PROMPT_COMMAND=build_prompt
-
-# ble.sh হুক
-[[ ${BLE_VERSION-} ]] && ble-attach
-EOF
-
-source ~/.bashrc 2>/dev/null
-echo -e "\n\033[1;32m[✔] Installation Successful for $USER_BANNER!\033[0m"
-echo -e "\033[1;36mAuthor Credit: EH-69 (https://github.com/EH-69)\033[0m\n"
+echo -e "\033[1;32m[✓] Setup Successful!\033[0m\n"
+exit 0
