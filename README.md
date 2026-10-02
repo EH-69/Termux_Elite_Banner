@@ -6,7 +6,7 @@
   <br><br>
 </div>
 
-## 🖼️ Terminal Preview
+### 🖼️ Terminal Preview
 *(Colors change automatically every time you clear the screen!)*
 
 <div align="center">
