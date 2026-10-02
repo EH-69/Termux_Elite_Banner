@@ -16,20 +16,28 @@ cat << "EOF"
  | |____| |  | |     | (_) |  / / 
  |______|_|  |_|      \___/  /_/  
 EOF
-echo -e "\033[1;32m[*] Installing EH Elite Terminal by \033[1;36mEH-69\033[0m"
+echo -e "\033[1;32m[*] Welcome to EH Elite Terminal Installer by \033[1;36mEH-69\033[0m"
 echo -e "\033[38;5;240m────────────────────────────────────────────────────────────\033[0m"
+
+# ১. ইউজার থেকে ব্যানারের নাম ইনপুট নেওয়া (ডিফল্ট: EH-69)
+echo -e "\033[1;33m[?] Customization Option:\033[0m"
+read -p "Enter Banner Name [Press Enter for default: EH-69]: " USER_BANNER
+USER_BANNER=${USER_BANNER:-"EH-69"}
+
+echo -e "\n\033[1;36m[*] Selected Banner Name: \033[1;32m$USER_BANNER\033[0m"
+echo -e "\033[1;36m[*] Setting up core packages, fonts & ble.sh...\033[0m"
 
 # ব্যাকআপ
 [ -f ~/.bashrc ] && cp ~/.bashrc ~/.bashrc.bak_eh69 2>/dev/null
 
-echo -e "\033[1;36m[*] Setting up dependencies & fonts...\033[0m"
 pkg update -y > /dev/null 2>&1
 pkg install -y figlet wget curl tar xz-utils ncurses-utils procps > /dev/null 2>&1
 
+# ৩ডি ফন্ট ডাউনলোড
 mkdir -p ~/.figlet_fonts
 wget -qO ~/.figlet_fonts/ANSI_Shadow.flf "https://raw.githubusercontent.com/xero/figlet-fonts/master/ANSI%20Shadow.flf" 2>/dev/null
 
-# ble.sh ইনস্টলেশন (Syntax Highlighting & Ghost Suggestions)
+# ble.sh ইনস্টলেশন
 mkdir -p ~/.local/share
 rm -rf /tmp/ble.tar.xz ~/.local/share/ble-nightly 2>/dev/null
 curl -k -fsSL "https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz" -o /tmp/ble.tar.xz 2>/dev/null || \
@@ -56,8 +64,8 @@ ble-face -s command_file fg=84
 ble-face -s command_error fg=196,underline
 EOF
 
-# নতুন .bashrc ফাইল তৈরি
-cat << 'EOF' > ~/.bashrc
+# পার্ট ১: ইউজারের পছন্দের নাম .bashrc ফাইলে সেভ করা
+cat << EOF > ~/.bashrc
 # ==============================================================================
 #  EH ELITE TERMINAL CONFIGURATION
 #  CREATOR: EH-69 (https://github.com/EH-69)
@@ -65,11 +73,15 @@ cat << 'EOF' > ~/.bashrc
 export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
 
+# ইউজার কনফিগার করা ব্যানারের নাম
+MY_NAME="$USER_BANNER"
+DEV_NAME="EH-69"
+EOF
+
+# পার্ট ২: মূল টার্মিনাল ইঞ্জিন অ্যাপেন্ড করা
+cat << 'EOF' >> ~/.bashrc
 # ble.sh লোড
 [[ $- == *i* ]] && [ -f "$HOME/.local/share/blesh/ble.sh" ] && source "$HOME/.local/share/blesh/ble.sh" --attach=none
-
-MY_NAME="EH-69"
-DEV_NAME="EH-69"
 
 print_banner() {
     # নিয়ন থিম প্যালেট
@@ -95,7 +107,7 @@ print_banner() {
 
     echo ""
 
-    # ১. ১ম লাইনে ডাবল দাগ
+    # ১. ১ম লাইনে বক্সের মতো ডাবল দাগ
     printf "${BORD_C}"
     for ((j=0; j<TERM_COLS; j++)); do printf "═"; done
     printf "${NC}\n"
@@ -118,6 +130,12 @@ print_banner() {
     fi
 
     mapfile -t ASCII_ART <<< "$ASCII_OUT"
+
+    # ফন্টের নিচের লুকানো খালি লাইন অটোমেটিক ট্রিম করা
+    while [ ${#ASCII_ART[@]} -gt 0 ] && [[ -z "${ASCII_ART[-1]// }" ]]; do
+        unset 'ASCII_ART[-1]'
+    done
+
     local TOTAL_LINES=${#ASCII_ART[@]}
     local HALF_LINES=$((TOTAL_LINES / 2))
 
@@ -132,7 +150,7 @@ print_banner() {
         fi
     done
 
-    # ৩. ব্যানারের নিচে কোনো ফাঁকা ছাড়া Neon Red কালারে EH ELITE TERMINAL
+    # ৩. ব্যানারের নিচে কোনো ফাঁকা স্পেস ছাড়া EH ELITE TERMINAL
     local SUB_TEXT="ﮩ٨ـﮩﮩ٨ـ𝙴𝙷 𝙴𝙻𝙸𝚃𝙴 𝚃𝙴𝚁𝙼𝙸𝙽𝙰𝙻ﮩ٨ـﮩﮩ٨ـ"
     local PAD_SUB=$(( (TERM_COLS - ${#SUB_TEXT}) / 2 ))
     [ $PAD_SUB -lt 0 ] && PAD_SUB=0
@@ -197,7 +215,6 @@ print_banner() {
 alias clear='command clear; print_banner'
 alias cls='clear'
 
-# স্টার্টআপ
 command clear
 print_banner
 
@@ -212,10 +229,10 @@ build_prompt() {
     local C_DIR="\[\033[38;5;221m\]"       # Gold Directory
     local RST="\[\033[0m\]"
 
-    # থিমের সাথে ডাইনামিক কালার
+    # ইউজারের নাম ডায়নামিক কালারে থাকবে
     local C_USER="\[${DYN_THEME_C:-\033[38;5;213m}\]"
 
-    # এরর ডিটেকশন (ভুল হলে লাল, ঠিক থাকলে নিয়ন গ্র্যাডিয়েন্ট)
+    # এরর ডিটেকশন (ভুল হলে লাল অ্যারো)
     local ARROWS
     if [ $EXIT_CODE -ne 0 ]; then
         ARROWS="\[\033[1;31m\]❯❯❯"
@@ -223,7 +240,7 @@ build_prompt() {
         ARROWS="\[\033[38;5;201m\]❯\[\033[38;5;129m\]❯\[\033[38;5;51m\]❯"
     fi
 
-    PS1="${C_SIDE}┌──${C_BRK}[${C_USER}EH-69${C_AT}@${C_HST}Terminal${C_BRK}]${C_SIDE}-${C_BRK}[${C_DIR}\w${C_BRK}]\n"
+    PS1="${C_SIDE}┌──${C_BRK}[${C_USER}${MY_NAME}${C_AT}@${C_HST}Terminal${C_BRK}]${C_SIDE}-${C_BRK}[${C_DIR}\w${C_BRK}]\n"
     PS1+="${C_SIDE}│\n"
     PS1+="${C_SIDE}└───${ARROWS}${RST} "
 }
@@ -235,4 +252,5 @@ PROMPT_COMMAND=build_prompt
 EOF
 
 source ~/.bashrc 2>/dev/null
-echo -e "\033[1;32m[✔] Installation Successful by EH-69!\033[0m\n"
+echo -e "\n\033[1;32m[✔] Installation Successful for $USER_BANNER!\033[0m"
+echo -e "\033[1;36mAuthor Credit: EH-69 (https://github.com/EH-69)\033[0m\n"
